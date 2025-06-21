@@ -1,0 +1,15 @@
+alembic==1.16.2
+APScheduler==3.11.0
+asyncpg==0.30.0
+bandit==1.8.5
+fastapi==0.115.13
+flake8==7.3.0
+greenlet==3.2.3
+httptools==0.6.4
+pydantic-settings==2.10.0
+safety==3.5.2
+uvicorn==0.34.3
+uvloop==0.21.0
+watchfiles==1.1.0
+websockets==15.0.1
+wheel==0.41.2
