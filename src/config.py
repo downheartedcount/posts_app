@@ -3,8 +3,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: PostgresDsn = \
-        "postgresql+asyncpg://postgres:1234@localhost:5432/json_app"
+    DATABASE_URL: PostgresDsn
     SQLALCHEMY_ECHO: bool = False
     BASE_URL: AnyHttpUrl = "https://jsonplaceholder.typicode.com"
     SYNC_INTERVAL_HOURS: int = 24
