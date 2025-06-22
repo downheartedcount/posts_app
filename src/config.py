@@ -7,6 +7,7 @@ if os.path.exists(secret_path):
     with open(secret_path) as f:
         os.environ["DATABASE_URL"] = f.read().strip()
 
+
 class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn
     SQLALCHEMY_ECHO: bool = False
@@ -15,5 +16,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = "../.env"
+
 
 settings = Settings()
