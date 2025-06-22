@@ -10,18 +10,28 @@ class FetchService:
     def __init__(self, client):
         self.client = client
 
-    async def _fetch(self, endpoint: str, entity_name: str) -> List[Dict]:
+    async def _fetch_users(self) -> List[Dict]:
+        logger.info("Fetching users from /users...")
         try:
-            logger.info(f"Fetching {entity_name} from {endpoint}...")
-            data = await self.client.get(endpoint)
-            logger.info(f"Fetched {len(data)} {entity_name}")
+            data = await self.client.get("/users")
+            logger.info(f"Fetched {len(data)} users")
             return data
         except HTTPError as e:
-            logger.error(f"Failed to fetch {entity_name}: {e}")
-            raise FetchError(f"Unable to fetch {entity_name}") from e
+            logger.error(f"Failed to fetch users: {e}")
+            raise FetchError("Unable to fetch users") from e
+
+    async def _fetch_posts(self) -> List[Dict]:
+        logger.info("Fetching posts from /posts...")
+        try:
+            data = await self.client.get("/posts")
+            logger.info(f"Fetched {len(data)} posts")
+            return data
+        except HTTPError as e:
+            logger.error(f"Failed to fetch posts: {e}")
+            raise FetchError("Unable to fetch posts") from e
 
     async def fetch_users(self) -> List[Dict]:
-        return await self._fetch("/users", "users")
+        return await self._fetch_users()
 
     async def fetch_posts(self) -> List[Dict]:
-        return await self._fetch("/posts", "posts")
+        return await self._fetch_posts()

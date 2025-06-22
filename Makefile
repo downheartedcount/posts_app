@@ -13,7 +13,10 @@ scan-code:
 lint:
 	flake8 src/
 
-docker-up:
+docker-down:
+	docker-compose down --volumes --remove-orphans
+
+docker-up: docker-down
 	docker-compose up --build
 
 docker-down:
