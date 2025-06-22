@@ -1,6 +1,11 @@
+import os
 from pydantic import PostgresDsn, AnyHttpUrl
 from pydantic_settings import BaseSettings
 
+secret_path = "/run/secrets/database_url"
+if os.path.exists(secret_path):
+    with open(secret_path) as f:
+        os.environ["DATABASE_URL"] = f.read().strip()
 
 class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn
@@ -11,11 +16,4 @@ class Settings(BaseSettings):
     class Config:
         env_file = "../.env"
 
-
 settings = Settings()
-
-try:
-    with open("/run/secrets/database_url") as f:
-        settings.DATABASE_URL = f.read().strip()
-except FileNotFoundError:
-    raise Exception("Database URL not found")
