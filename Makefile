@@ -4,10 +4,6 @@ run:
 init-db:
 	python src/db/init_db.py
 
-reset-db:
-	psql -h localhost -U postgres -c 'DROP DATABASE IF EXISTS json_app; CREATE DATABASE json_app;'
-	make init-db
-
 scan-safety:
 	safety check --full-report --file=requirements.txt
 
