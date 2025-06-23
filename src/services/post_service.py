@@ -1,34 +1,43 @@
-from typing import Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.orm import joinedload
+from abc import abstractmethod, ABC
+from typing import List, Dict
+from httpx import HTTPError
+from src.exceptions import FetchError
+from src.utils.http_client import HTTPClient, logger
 
-from src.models.db_models import Post
 
-class PostService:
-    def __init__(self, session: AsyncSession):
-        self.session = session
+class BasePostServive(ABC):
 
-    async def get_posts(
-        self,
-        user_id: Optional[int] = None,
-        title: Optional[str] = None,
-        username: Optional[str] = None,
-        skip: int = 0,
-        limit: int = 100,
-    ):
-        query = select(Post).options(joinedload(Post.user))
+    @abstractmethod
+    async def _fetch_users(self) -> List[Dict]:
+        raise NotImplementedError
 
-        if user_id is not None:
-            query = query.where(Post.user_id == user_id)
+    @abstractmethod
+    async def _fetch_posts(self) -> List[Dict]:
+        raise NotImplementedError
 
-        if title is not None:
-            query = query.where(Post.title.ilike(f"%{title}%"))
 
-        if username is not None:
-            query = query.where(Post.user.has(username=username))
+class PostService(BasePostServive):
+    def __init__(self):
+        self.http = HTTPClient()
 
-        query = query.offset(skip).limit(limit)
+    async def _fetch_users(self) -> List[Dict]:
+        logger.info("Fetching users from /users...")
+        await self.http.startup()
+        try:
+            data = await self.http.get("/users")
+            logger.info(f"Fetched {len(data)} users")
+            return data
+        except HTTPError as e:
+            logger.error(f"Failed to fetch users: {e}")
+            raise FetchError("Unable to fetch users") from e
 
-        result = await self.session.execute(query)
-        return result.scalars().all()
+    async def _fetch_posts(self) -> List[Dict]:
+        logger.info("Fetching posts from /posts...")
+        await self.http.startup()
+        try:
+            data = await self.http.get("/posts")
+            logger.info(f"Fetched {len(data)} posts")
+            return data
+        except HTTPError as e:
+            logger.error(f"Failed to fetch posts: {e}")
+            raise FetchError("Unable to fetch posts") from e

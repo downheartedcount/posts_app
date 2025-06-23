@@ -16,7 +16,7 @@ lint:
 docker-down:
 	docker-compose down --volumes --remove-orphans
 
-docker-up: docker-down
+docker-up:
 	docker-compose up --build
 
 docker-down:

@@ -1,92 +1,133 @@
-# FastAPI JSON Sync App
+# FastAPI JSONPlaceholder Sync App
 
-Это веб-приложение на FastAPI, которое синхронизирует посты и пользователей с [JSONPlaceholder](https://jsonplaceholder.typicode.com) раз в сутки, сохраняет их в PostgreSQL и предоставляет REST API с фильтрацией по данным постов и информации об авторах.
+## Описание
 
----
+Это асинхронное веб-приложение на FastAPI, которое синхронизирует посты и пользователей с внешнего API [`https://jsonplaceholder.typicode.com`](https://jsonplaceholder.typicode.com). Данные сохраняются в PostgreSQL. Реализован REST API для получения постов с фильтрацией по авторам, названию и другим полям.
 
-## Возможности
-
-- Асинхронный стек: `FastAPI + SQLAlchemy + PostgreSQL`
-- Ежедневная синхронизация постов и пользователей
-- REST API с фильтрацией и пагинацией
-- Docker + Docker Compose
-- Хранение секретов через `docker secrets`
+Приложение:
+- полностью асинхронное
+- использует Pydantic, SQLAlchemy, HTTPX
+- конфигурируется через `.env` и Docker secrets
+- запускает фоновую синхронизацию каждые 24 часа через APScheduler
 
 ---
 
-## Стек технологий
+## Технологии
 
 - Python 3.11
 - FastAPI
+- PostgreSQL 15
 - SQLAlchemy (async)
-- PostgreSQL
+- HTTPX
 - APScheduler
-- Docker / docker-compose
-- Pydantic v2
+- Docker & Docker Compose
 
 ---
 
-## Установка и запуск
+## Запуск (Docker)
 
-### Требования
+### 1. Подготовить секреты
 
-- Docker + Docker Compose
+Создайте директорию `secrets` в корне проекта:
 
-### Сборка и запуск
+```bash
+mkdir secrets
+```
+
+Создайте файл пароля БД:
+
+```bash
+echo "yourpassword" > secrets/postgres_password.txt
+```
+
+### 2. Собрать и запустить контейнеры
 
 ```bash
 make docker-up
 ```
-Это:
 
-- соберёт образ
-- поднимет PostgreSQL
-- создаст таблицы
-- запустит FastAPI на http://localhost:8000
+Первым запускается init_db.py, который создаёт таблицы. Затем запускается FastAPI-приложение.
 
 
-### Остановка и удаление
+## Структура проекта
 
-```bash
-make docker-down
+- .
+- ├── docker-compose.yml
+- ├── Dockerfile
+- ├── requirements.txt
+- ├── .env
+- ├── secrets/
+- │   ├── postgres_password.txt
+- │   └── database_url.txt
+- └── src/
+-    ├── main.py
+-    ├── db/
+-    │   ├── session.py
+-    │   ├── repo.py
+-    │   └── init_db.py
+-    ├── configs/
+-    │   ├── app_config.py
+-    │   └── db_config.py
+-    ├── client/
+-    │   └── posts_client.py
+-    ├── services/
+-    │   └── sync_service.py
+-    ├── api/
+-    │   └── routes.py
+-    ├── models/
+-    │   ├── db_models.py
+-    │   ├── schemas.py
+-    │   └── models.py
+-    ├── utils/
+-    │   ├── http_client.py
+-    │   ├── scheduler.py
+-    │   └── dependencies.py
+-    └── exceptions.py
+
+## Настройки
+
+```ini
+DB_HOST=
+DB_PORT=
+DB_NAME=
+DB_USER=
+SQLALCHEMY_ECHO=false
+BASE_URL=https://jsonplaceholder.typicode.com
+SYNC_INTERVAL_HOURS=24
 ```
 
+Путь к .env прописан в Config каждого Pydantic класса (AppConfig, DBConfig).
 
-### Структура проекта
-- .
-- ├── src/
-- │   ├── api/              # Роуты
-- │   ├── client/           # HTTP клиент для JSONPlaceholder
-- │   ├── db/               # Сессия и инициализация БД
-- │   ├── models/           # SQLAlchemy и Pydantic модели
-- │   ├── services/         # Логика синхронизации и БД
-- │   └── utils/            # Зависимости, планировщик
-- ├── secrets/              # Docker secrets
-- ├── .env                  # Переменные окружения
-- ├── Dockerfile
-- ├── docker-compose.yml
-- ├── Makefile
-- └── README.md
+## Синхронизация
 
-### API
+Синхронизация пользователей и постов происходит:
 
-Получение постов с фильтрацией
+- один раз при старте приложения
+- раз в сутки через APScheduler (фоновая задача)
+- Обрабатываются дубликаты (insert only new).
+
+
+## API Endpoints
 
 ```bash
 GET /posts
 ```
 
-## Параметры
-
-| Параметр | Тип    | Описание                                   |
-|----------|--------|--------------------------------------------|
-| `user_id`  | `int`   | Фильтр по ID пользователя                  |
-| `title`    | `str`   | Поиск по заголовку (частичное совпадение) |
-| `limit`    | `int`   | Кол-во записей (по умолчанию: 100)        |
-| `username` | `str`   | Поиск по username                         |
+Фильтры:
+- user_id: int
+- username: str
+- title: str
+- skip: int
+- limit: int (по умолчанию 100)
 
 
-Пример:
 ```bash
-GET /posts?user_id=1&username=Bret
+GET /posts?user_id=1&title=qui
 ```
+
+## Логгирование
+
+```yaml
+2025-06-23 04:15:13 [INFO] posts_client: Fetched 100 posts
+```
+

@@ -1,14 +1,13 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from src.utils.dependencies import get_sync_service
+from src.configs.app_config import get_app_config
+from src.scheduler.schedule import start_scheduler
+from src.services.sync_service import SyncService
 from src.api.routes import router
-from src.utils.scheduler import start_scheduler
 import logging
+from src.utils.http_client import HTTPClient
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
+app_config = get_app_config()
 
 
 @asynccontextmanager
@@ -23,17 +22,36 @@ async def lifespan(app: FastAPI):
     yield
 
 
+@asynccontextmanager
+async def get_sync_service():
+    client = HTTPClient(str(app_config.BASE_URL))
+    await client.startup()
+
+    try:
+        sync_service = SyncService()
+        yield sync_service
+    finally:
+        await client.shutdown()
+
+
 def create_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan)
     app.include_router(router)
     return app
+
 
 app = create_app()
 
 
 def main():
     import uvicorn
-    uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(
+        "src.main:app",
+        host=app_config.APP_HOST,
+        port=app_config.APP_PORT,
+        reload=True
+    )
+
 
 if __name__ == "__main__":
     main()

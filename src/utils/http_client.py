@@ -5,14 +5,19 @@ logger = logging.getLogger(__name__)
 
 
 class HTTPClient:
-    def __init__(self, base_url: str):
+    def __init__(
+            self,
+            base_url: str = "https://jsonplaceholder.typicode.com",
+            timeout: int = 10
+    ):
         self.base_url = base_url
         self.client = None
+        self.timeout = timeout
 
     async def startup(self):
         self.client = httpx.AsyncClient(
             base_url=self.base_url,
-            timeout=httpx.Timeout(10.0, connect=5.0)
+            timeout=httpx.Timeout(self.timeout, connect=5.0)
         )
 
     async def shutdown(self):

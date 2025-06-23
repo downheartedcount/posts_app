@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
@@ -11,6 +11,7 @@ class User(Base):
     name = Column(String(100), nullable=False)
     username = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     posts = relationship("Post", back_populates="user")
 
@@ -30,6 +31,7 @@ class Post(Base):
     )
     title = Column(String(200), nullable=False)
     body = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="posts")
 
