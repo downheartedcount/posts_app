@@ -42,11 +42,12 @@ services:
       APP_NAME: "Post Sync App"
       APP_HOST: "0.0.0.0"
       APP_PORT: 8000
+      HTTP_TIMEOUT: 10
       DB_HOST: db
       DB_PORT: 5432
       DB_NAME: json_app
       DB_USER: postgres
-      DB_PASSWORD_FILE: /run/secrets/postgres_password.txt
+      DB_PASSWORD_FILE: /run/secrets/postgres_password
       SQLALCHEMY_ECHO: "false"
       BASE_URL: "https://jsonplaceholder.typicode.com"
       SYNC_INTERVAL_HOURS: 24
@@ -56,6 +57,4 @@ volumes:
 
 secrets:
   postgres_password:
-    file: ./secrets/postgres_password.txt
-  database_url:
-    file: ./secrets/database_url.txt
+    file: ./secrets/postgres_password
