@@ -46,13 +46,9 @@ def create_app() -> FastAPI:
 
 app = create_app()
 
-origins = [
-    "http://localhost:8080", #for dev, in production remove and add to .env
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=app_config.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
