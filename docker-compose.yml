@@ -9,23 +9,24 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: json_app
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 30s
       timeout: 5s
       retries: 5
+    networks:
+      - app_net
+    expose:
+      - "5432"
 
   app:
     build: .
     container_name: json_app
     depends_on:
-      - db
-    ports:
-      - "8000:8000"
+      db:
+        condition: service_healthy
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -49,5 +50,12 @@ services:
       BASE_URL: "https://jsonplaceholder.typicode.com"
       SYNC_INTERVAL_HOURS: 24
 
+    networks:
+      - app_net
+
 volumes:
   pg_data:
+
+networks:
+  app_net:
+    driver: bridge

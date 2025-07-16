@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Подключён Poetry для управления зависимостями (`pyproject.toml`, `poetry.lock`)
 - Добавлен `CORSMiddleware` с настройкой через `.env` (переменная `CORS_ORIGINS`)
 - Явное логирование ошибок в `PostRepo`, `PostClient`, `routes`, с `logger.exception`
+- База данных PostgreSQL больше не публикуется наружу (`ports` заменён на `expose` в `docker-compose.yml`)
+- Все сервисы объединены в общую `app_net` сеть для ограничения доступа
+- CORS настраивается только через `.env` (без жёстко заданных значений в `main.py`)
+- Разрешённые заголовки CORS ограничены до безопасных (`Content-Type`, `Authorization`)
+
 
 ### Changed
 - Удалены Docker secrets (`/secrets`), теперь используется только `.env` (передаётся в контейнер через `:ro`)
