@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   db:
     image: postgres:15
@@ -6,14 +8,11 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: json_app
-      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
-    secrets:
-      - postgres_password
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
-      - ./entrypoint/postgres-entrypoint.sh:/entrypoint/postgres-entrypoint.sh:ro
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 30s
@@ -36,8 +35,6 @@ services:
     volumes:
       - ./src:/app/src:ro
       - ./.env:/app/.env:ro
-    secrets:
-      - postgres_password
     environment:
       APP_NAME: "Post Sync App"
       APP_HOST: "0.0.0.0"
@@ -47,14 +44,10 @@ services:
       DB_PORT: 5432
       DB_NAME: json_app
       DB_USER: postgres
-      DB_PASSWORD_FILE: /run/secrets/postgres_password
+      DB_PASSWORD: ${DB_PASSWORD}
       SQLALCHEMY_ECHO: "false"
       BASE_URL: "https://jsonplaceholder.typicode.com"
       SYNC_INTERVAL_HOURS: 24
 
 volumes:
   pg_data:
-
-secrets:
-  postgres_password:
-    file: ./secrets/postgres_password

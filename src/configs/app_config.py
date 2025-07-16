@@ -1,5 +1,7 @@
 import os
-from pydantic import AnyHttpUrl
+from typing import List
+
+from pydantic import AnyHttpUrl, Field
 from functools import lru_cache
 from pydantic_settings import BaseSettings
 
@@ -11,6 +13,7 @@ class AppConfig(BaseSettings):
 
     BASE_URL: AnyHttpUrl = os.environ['BASE_URL']
     HTTP_TIMEOUT: int = 10
+    CORS_ORIGINS: List[str] = os.environ['CORS_ORIGINS'].split(',')
 
     class Config:
         env_file = ".env"

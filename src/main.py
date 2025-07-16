@@ -6,8 +6,12 @@ from src.services.sync_service import SyncService
 from src.api.routes import router
 import logging
 from src.utils.http_client import HTTPClient
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 app_config = get_app_config()
+
 
 
 @asynccontextmanager
@@ -42,6 +46,18 @@ def create_app() -> FastAPI:
 
 app = create_app()
 
+origins = [
+    "http://localhost:8080", #for dev, in production remove and add to .env
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+
 
 def main():
     import uvicorn
@@ -49,7 +65,6 @@ def main():
         "src.main:app",
         host=app_config.APP_HOST,
         port=app_config.APP_PORT,
-        reload=True
     )
 
 

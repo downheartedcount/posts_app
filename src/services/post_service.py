@@ -20,7 +20,7 @@ class PostService(BasePostServive):
     def __init__(self):
         self.http = HTTPClient()
 
-    async def _fetch_users(self) -> List[Dict]:
+    async def fetch_users(self) -> List[Dict]:
         logger.info("Fetching users from /users...")
         await self.http.startup()
         try:
@@ -31,7 +31,7 @@ class PostService(BasePostServive):
             logger.error(f"Failed to fetch users: {e}")
             raise FetchError("Unable to fetch users") from e
 
-    async def _fetch_posts(self) -> List[Dict]:
+    async def fetch_posts(self) -> List[Dict]:
         logger.info("Fetching posts from /posts...")
         await self.http.startup()
         try:

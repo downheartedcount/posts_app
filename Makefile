@@ -4,8 +4,11 @@ run:
 init-db:
 	python src/db/init_db.py
 
-scan-safety:
-	safety check --full-report --file=requirements.txt
+install:
+	poetry install --no-root
+
+lock:
+	poetry update
 
 scan-code:
 	bandit -r src/

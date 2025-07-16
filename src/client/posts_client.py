@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class PostsClient(BaseClient):
-    BASE_URL = "https://jsonplaceholder.typicode.com/posts"
 
     def __init__(self):
         self.db = SessionLocal()
@@ -22,14 +21,14 @@ class PostsClient(BaseClient):
 
     async def fetch_users(self) -> List[Dict]:
         try:
-            return await self.post._fetch_users()
+            return await self.post.fetch_users()
         except Exception as e:
             logger.exception("Failed to fetch users")
             raise FetchError("Fetching users failed") from e
 
     async def fetch_posts(self) -> List[Dict]:
         try:
-            return await self.post._fetch_posts()
+            return await self.post.fetch_posts()
         except Exception as e:
             logger.exception("Failed to fetch posts")
             raise FetchError("Fetching posts failed") from e

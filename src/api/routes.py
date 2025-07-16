@@ -1,5 +1,5 @@
 import logging
-from http.client import HTTPException
+from fastapi import HTTPException
 from typing import Optional
 from fastapi import APIRouter
 from src.client.posts_client import PostsClient
@@ -32,9 +32,9 @@ async def get_posts(
         service = PostsClient()
         posts = await service.get_posts(post_request)
         if not posts:
-            raise 404
+            raise HTTPException(status_code=404, detail="Posts Not Found")
         return posts
 
     except AppException:
-        logger.error("Data fetch failed")
-        raise 500
+        logger.exception("Data fetch failed")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
